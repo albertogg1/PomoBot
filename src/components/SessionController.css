@@ -17,14 +17,17 @@
 }
 
 .theme-toggle {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
+  position: relative;
+  bottom: auto;
+  left: auto;
   width: 50px;
   height: 50px;
   border-radius: 50%;
   border: 2px solid #555555;
   background: #2a2a2a;
+  color: #ffffff;
+  border: 2px solid rgba(15,23,42,0.04);
+  background: #1a1a1a;
   color: #ffffff;
   font-size: 1.5rem;
   cursor: pointer;
@@ -40,6 +43,8 @@
 .theme-toggle.light {
   background: #e8e8e8;
   border-color: #888888;
+  background: #ffffff;
+  border-color: rgba(15,23,42,0.04);
 }
 
 .theme-toggle .theme-icon {
@@ -71,10 +76,13 @@
   border: 1px solid #555555;
   border-radius: 4px;
   cursor: pointer;
+  border: 1px solid rgba(15,23,42,0.04);
   transition: all 0.3s ease;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
   letter-spacing: 0.5px;
   background: #2a2a2a;
+  color: #ffffff;
+  background: #1a1a1a;
   color: #ffffff;
 }
 
@@ -114,17 +122,24 @@
   background: #d8d8d8;
   border-color: #888888;
   color: #000000;
+  background: #ffffff;
+  border-color: rgba(15,23,42,0.04);
+  color: #0f172a;
 }
 
 .control-btn:hover {
   transform: translateY(-2px);
   border-color: #777777;
   background: #333333;
+  border-color: rgba(0,0,0,0.12);
+  background: rgba(0,0,0,0.06);
 }
 
 .session-controller.light .controls .control-btn:hover {
   background: #c0c0c0;
   border-color: #666666;
+  background: #e5e7eb;
+  border-color: rgba(15,23,42,0.04);
 }
 
 .control-btn:active {
@@ -135,12 +150,17 @@
   background: #1a1a1a;
   border: 1px solid #555555;
   color: #ffffff;
+  background: #1a1a1a;
+  border: 1px solid rgba(15,23,42,0.04);
+  color: #ffffff;
   min-width: 100px;
 }
 
 .play-pause:hover {
   background: #222222;
   border-color: #777777;
+    background: rgba(0,0,0,0.06);
+    border-color: rgba(0,0,0,0.12);
 }
 
 .play-pause.playing {
@@ -152,6 +172,9 @@
   background: #1a1a1a;
   border: 1px solid #555555;
   color: #ffffff;
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.04);
+    color: #ffffff;
 }
 
 .reset:hover {
@@ -163,6 +186,9 @@
   background: #1a1a1a;
   border: 1px solid #555555;
   color: #ffffff;
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.04);
+    color: #ffffff;
 }
 
 .skip:hover {
@@ -174,24 +200,48 @@
   background: #1a1a1a;
   border: 1px solid #555555;
   color: #ffffff;
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.04);
+    color: #ffffff;
 }
 
 .settings:hover {
   background: #222222;
   border-color: #777777;
+    background: rgba(0,0,0,0.06);
+    border-color: rgba(0,0,0,0.12);
 }
 
 @media (max-width: 600px) {
   .session-controller {
     gap: 8px;
   }
-
   .control-btn {
-    padding: 6px 15px;
+    padding: 6px 10px;
     font-size: 0.75rem;
   }
 
+  /* On small viewports show only the icons (hide the text labels) */
+  .control-btn .text {
+    display: none;
+  }
+  .control-btn .icon {
+    margin: 0;
+    display: inline-flex;
+  }
+
   .play-pause {
-    min-width: 80px;
+    min-width: 56px;
+    padding: 6px 10px;
+  }
+
+  /* Reduce spacing between control buttons on small screens */
+  .session-controller .controls {
+    gap: 8px;
+  }
+
+  /* Ensure play-pause doesn't keep extra right margin */
+  .session-controller .controls .play-pause {
+    margin-right: 0;
   }
 }

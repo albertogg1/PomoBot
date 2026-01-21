@@ -5,14 +5,6 @@ import { FaPlay, FaPause, FaRedo, FaForward, FaClock } from 'react-icons/fa'
 export default function SessionController({ isRunning, onToggle, onReset, onSkip, isDarkMode, onThemeToggle, onOpenSettings, workDuration, breakDuration }) {
   return (
     <div className={`session-controller ${isDarkMode ? 'dark' : 'light'}`}>
-      <button
-        className={`theme-toggle ${isDarkMode ? 'dark' : 'light'}`}
-        onClick={onThemeToggle}
-        title={isDarkMode ? 'Modo claro' : 'Modo oscuro'}
-      >
-        {isDarkMode ? <BsSun className="theme-icon" size={20} /> : <BsMoon className="theme-icon" size={20} />}
-      </button>
-
       <div className="controls">
         <button
           className={`control-btn play-pause ${isRunning ? 'playing' : ''}`}

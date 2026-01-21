@@ -2,8 +2,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1100;
 }
 
 .flip-clock {
@@ -17,7 +22,7 @@
 }
 
 .flip-clock.light {
-  color: #000000;
+  color: #0f172a;
 }
 
 .flip-clock.work {
@@ -93,22 +98,22 @@
 }
 
 .flip-card-front {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  color: #dbdbdb;
+  background: linear-gradient(135deg, #1a1a1a 0%, rgba(0,0,0,0.18) 100%);
+  color: #ffffff;
   transition: all 0.3s ease;
 }
 
 .flip-card-back {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  color: #dbdbdb;
+  background: linear-gradient(135deg, #1a1a1a 0%, rgba(0,0,0,0.18) 100%);
+  color: #ffffff;
   transform: rotateY(180deg);
   transition: all 0.3s ease;
 }
 
 .flip-clock-container.light .flip-card-front,
 .flip-clock-container.light .flip-card-back {
-  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
-  color: #000000;
+  background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+  color: #0f172a;
 }
 
 .flip-label {
@@ -120,8 +125,8 @@
 }
 
 .flip-clock-container.light .separator {
-  color: #aaaaaa;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  color: #6b7280;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
 @keyframes blink {
@@ -150,5 +155,24 @@
   .flip-label {
     font-size: 0.65rem;
     bottom: -25px;
+  }
+
+  /* Stack hours/minutes (digit groups) vertically on small screens */
+  .time-display {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .digit-group {
+    width: 80vw;
+    height: auto;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .flip-card {
+    height: 32vw;
+    min-width: 140px;
   }
 }

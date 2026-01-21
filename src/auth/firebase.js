@@ -88,7 +88,8 @@ export async function saveStudySession(uid, session) {
     note: session.note || null,
     rating: session.rating || null,
     completedAt: session.completedAt || null,
-    createdAt: serverTimestamp(),
+    // allow passing a createdAt (Date or ISO string) for test data; otherwise use serverTimestamp()
+    createdAt: session.createdAt ? (session.createdAt instanceof Date ? session.createdAt : new Date(session.createdAt)) : serverTimestamp(),
     meta: session.meta || null,
   }
   const docRef = await addDoc(col, payload)

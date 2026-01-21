@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { GiTomato } from 'react-icons/gi'
 import { FaCoffee, FaClock, FaMusic, FaVolumeMute, FaGoogle, FaApple, FaSignOutAlt, FaUser } from 'react-icons/fa'
+import { BsSun, BsMoon } from 'react-icons/bs'
 import FlipClock from './components/FlipClock'
 import SessionController from './components/SessionController'
 import RatingModal from './components/RatingModal'
@@ -329,9 +330,9 @@ function App() {
           <FaUser size={18} />
         )}
       </button>
-
+        
       {showAuthMenu && user && (
-        <div ref={authMenuRef} className={`auth-menu ${isDarkMode ? 'dark' : 'light'}`} style={{position:'fixed', right:18, top:64, zIndex:1300}}>
+        <div ref={authMenuRef} className={`auth-menu ${isDarkMode ? 'dark' : 'light'}`} style={{position:'fixed', right:18, top:12}}>
           <div className="auth-menu-user">
             {user.photoURL ? <img src={user.photoURL} alt="avatar" className="auth-avatar-sm" /> : <FaUser />}
             <div style={{marginLeft:8}}>
@@ -340,9 +341,12 @@ function App() {
             </div>
           </div>
           <div style={{marginTop:10}}>
-            <div style={{display:'flex', gap:8}}>
-              <button className="settings-btn save" onClick={() => openDashboard()}>Dashboard</button>
-              <button className="settings-btn cancel" onClick={async () => { await handleSignOut(); setShowAuthMenu(false) }}>Cerrar sesión</button>
+            <div style={{display:'flex', flexDirection:'column', gap:8}}>
+              <span className="perf-text" onClick={() => { openDashboard(); setShowAuthMenu(false) }}>Rendimiento</span>
+              <span className="perf-text" onClick={() => { setShowSettings(true); setShowAuthMenu(false) }}>Ajustes</span>
+              <button className="logout-btn" onClick={async () => { await handleSignOut(); setShowAuthMenu(false) }}>
+                <FaSignOutAlt /> Cerrar sesión
+              </button>
             </div>
           </div>
         </div>
@@ -353,6 +357,16 @@ function App() {
       <FlipClock minutes={minutes} seconds={seconds} sessionType={sessionType} isDarkMode={isDarkMode} />
 
         <div className="footer-controls">
+        {/* Left: theme toggle */}
+        <button
+          className={`theme-toggle ${isDarkMode ? 'dark' : 'light'}`}
+          onClick={() => setIsDarkMode(!isDarkMode)}
+          title={isDarkMode ? 'Modo claro' : 'Modo oscuro'}
+          aria-label={isDarkMode ? 'Modo claro' : 'Modo oscuro'}
+        >
+          {isDarkMode ? <BsSun className="theme-icon" size={20} /> : <BsMoon className="theme-icon" size={20} />}
+        </button>
+
         <SessionController
           isRunning={isRunning}
           onToggle={toggleTimer}
@@ -368,6 +382,17 @@ function App() {
           workDuration={workDuration}
           breakDuration={breakDuration}
         />
+        {/* Right: yt-button */}
+        <div style={{display:'flex', alignItems:'center', gap:10}}>
+          <button
+            className={`yt-button ${ytPlaying ? 'playing' : ''} ${isDarkMode ? 'dark' : 'light'}`}
+            onClick={() => setYtPlaying((p) => !p)}
+            aria-label={ytPlaying ? 'Detener música' : 'Reproducir música'}
+          >
+            {ytPlaying ? <FaVolumeMute size={18} /> : <FaMusic size={20} />}
+          </button>
+        </div>
+
       </div>
 
       {showSettings && (
@@ -446,14 +471,7 @@ function App() {
 
       
 
-      {/* YouTube music toggle (plays in background via hidden iframe) */}
-      <button
-        className={`yt-button ${ytPlaying ? 'playing' : ''} ${isDarkMode ? 'dark' : 'light'}`}
-        onClick={() => setYtPlaying((p) => !p)}
-        aria-label={ytPlaying ? 'Detener música' : 'Reproducir música'}
-      >
-        {ytPlaying ? <FaVolumeMute size={18} /> : <FaMusic size={20} />}
-      </button>
+      {/* YouTube music toggle is now inside the footer-controls */}
 
       {/* Hidden iframe to keep playback alive without foreground overlay */}
       {ytPlaying && (
