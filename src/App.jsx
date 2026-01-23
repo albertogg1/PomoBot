@@ -330,7 +330,7 @@ function App() {
       <div className="header-info">
         <div className="session-info">
           <span className={`session-badge ${sessionType}`}>
-            {sessionType === 'work' ? <><img src="./pomodoro.png" alt="PomoBot" style={{marginRight:6, height:20}}/> Trabajo</> : <><FaCoffee style={{marginRight:6, color:'#8B5E3C'}} />Descanso</>}
+            {sessionType === 'work' ? <><img src="/pomodoro.png" alt="PomoBot" style={{marginRight:6, height:20}}/> Trabajo</> : <><FaCoffee style={{marginRight:6, color:'#8B5E3C'}} />Descanso</>}
           </span>
           <span className="sessions-count">Sesiones: {sessionsCompleted}</span>
         </div>

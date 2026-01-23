@@ -1,12 +1,35 @@
-import { initializeApp } from 'firebase/app'
-import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithRedirect, getRedirectResult, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, orderBy, getDocs, serverTimestamp } from 'firebase/firestore'
+// firebase.js
+import { initializeApp, getApps, getApp } from 'firebase/app'
+import {
+  getAuth,
+  GoogleAuthProvider,
+  OAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  signOut,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from 'firebase/auth'
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  getDocs,
+  serverTimestamp,
+  limit as fsLimit,
+  Timestamp,
+} from 'firebase/firestore'
 
-// IMPORTANT: provide your Firebase config values via Vite env variables.
-// Create a Firebase project, enable Auth providers (Google, Apple) and Firestore.
-// Add these to a .env file at project root (Vite uses VITE_ prefix):
-// VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID,
-// VITE_FIREBASE_STORAGE_BUCKET, VITE_FIREBASE_MESSAGING_SENDER_ID, VITE_FIREBASE_APP_ID
+/* ------------------------------------------------------------------ */
+/* Firebase initialization                                            */
+/* ------------------------------------------------------------------ */
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -17,105 +40,137 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-let app
-try {
-  app = initializeApp(firebaseConfig)
-} catch (e) {
-  // initialization errors will surface if config is missing; keep app undefined
-  app = null
-}
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig)
+const auth = getAuth(app)
+const db = getFirestore(app)
 
-const auth = app ? getAuth(app) : null
-const db = app ? getFirestore(app) : null
+/* ------------------------------------------------------------------ */
+/* Providers                                                          */
+/* ------------------------------------------------------------------ */
 
 const googleProvider = new GoogleAuthProvider()
 const appleProvider = new OAuthProvider('apple.com')
 
-function isMobileDevice() {
-  try {
-    if (typeof navigator === 'undefined') return false
-    return /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent)
-  } catch (e) { return false }
-}
+/* ------------------------------------------------------------------ */
+/* Auth helpers                                                       */
+/* ------------------------------------------------------------------ */
 
 export async function signInWithGoogle() {
-  if (!auth) throw new Error('Firebase not initialized')
-  // Use redirect on mobile (better reliability), popup on desktop
-  if (isMobileDevice()) return signInWithRedirect(auth, googleProvider)
-  return signInWithPopup(auth, googleProvider)
+  try {
+    return await signInWithPopup(auth, googleProvider)
+  } catch (err) {
+    if (err?.code === 'auth/popup-blocked' || err?.code === 'auth/popup-closed-by-user') {
+      return signInWithRedirect(auth, googleProvider)
+    }
+    throw err
+  }
 }
 
 export async function signInWithApple() {
-  if (!auth) throw new Error('Firebase not initialized')
-  // Make sure you have enabled Apple in Firebase console and configured
-  // the Service ID and redirect URL in Apple Developer console.
-  if (isMobileDevice()) return signInWithRedirect(auth, appleProvider)
-  return signInWithPopup(auth, appleProvider)
+  try {
+    return await signInWithPopup(auth, appleProvider)
+  } catch (err) {
+    if (err?.code === 'auth/popup-blocked' || err?.code === 'auth/popup-closed-by-user') {
+      return signInWithRedirect(auth, appleProvider)
+    }
+    throw err
+  }
 }
 
+/**
+ * Call ONCE on app startup.
+ * If login was via redirect, the user will be returned here.
+ */
+export async function handleRedirectResult() {
+  try {
+    return await getRedirectResult(auth)
+  } catch (err) {
+    throw err
+  }
+}
+
+export function onAuthChange(callback) {
+  return onAuthStateChanged(auth, (user) => {
+    callback(user)
+  })
+}
+
+export async function signOutUser() {
+  return signOut(auth)
+}
+
+/* ------------------------------------------------------------------ */
+/* Email / password                                                   */
+/* ------------------------------------------------------------------ */
+
 export async function createUserWithEmail(email, password) {
-  if (!auth) throw new Error('Firebase not initialized')
   return createUserWithEmailAndPassword(auth, email, password)
 }
 
 export async function signInWithEmail(email, password) {
-  if (!auth) throw new Error('Firebase not initialized')
   return signInWithEmailAndPassword(auth, email, password)
 }
 
-export async function signOutUser() {
-  if (!auth) return
-  return signOut(auth)
-}
-
-export function onAuthChange(callback) {
-  if (!auth) return () => {}
-  return onAuthStateChanged(auth, callback)
-}
+/* ------------------------------------------------------------------ */
+/* User preferences                                                   */
+/* ------------------------------------------------------------------ */
 
 export async function saveUserPreferences(uid, prefs) {
-  if (!db) throw new Error('Firestore not initialized')
   const ref = doc(db, 'users', uid)
-  await setDoc(ref, { preferences: prefs, updatedAt: new Date().toISOString() }, { merge: true })
+  await setDoc(
+    ref,
+    {
+      preferences: prefs,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  )
 }
 
 export async function loadUserPreferences(uid) {
-  if (!db) return null
   const ref = doc(db, 'users', uid)
   const snap = await getDoc(ref)
   if (!snap.exists()) return null
-  const data = snap.data()
-  return data.preferences ?? null
+  return snap.data().preferences ?? null
 }
 
-// Sessions: save a study session under users/{uid}/sessions
+/* ------------------------------------------------------------------ */
+/* Study sessions                                                     */
+/* ------------------------------------------------------------------ */
+
 export async function saveStudySession(uid, session) {
-  if (!db) throw new Error('Firestore not initialized')
   const col = collection(db, 'users', uid, 'sessions')
+
   const payload = {
-    type: session.type || 'work',
-    duration: session.duration || 0,
-    note: session.note || null,
-    rating: session.rating || null,
-    completedAt: session.completedAt || null,
-    // allow passing a createdAt (Date or ISO string) for test data; otherwise use serverTimestamp()
-    createdAt: session.createdAt ? (session.createdAt instanceof Date ? session.createdAt : new Date(session.createdAt)) : serverTimestamp(),
-    meta: session.meta || null,
+    type: session.type ?? 'work',
+    duration: session.duration ?? 0,
+    note: session.note ?? null,
+    rating: session.rating ?? null,
+    completedAt: session.completedAt
+      ? Timestamp.fromDate(new Date(session.completedAt))
+      : null,
+    createdAt: session.createdAt
+      ? Timestamp.fromDate(new Date(session.createdAt))
+      : serverTimestamp(),
+    meta: session.meta ?? null,
   }
+
   const docRef = await addDoc(col, payload)
   return docRef.id
 }
 
 export async function fetchUserSessions(uid, limit = 50) {
-  if (!db) throw new Error('Firestore not initialized')
   const col = collection(db, 'users', uid, 'sessions')
-  const q = query(col, orderBy('createdAt', 'desc'))
+  const q = query(
+    col,
+    orderBy('createdAt', 'desc'),
+    fsLimit(limit)
+  )
+
   const snap = await getDocs(q)
-  const items = []
-  snap.forEach((d) => {
-    items.push({ id: d.id, ...d.data() })
-  })
-  return items.slice(0, limit)
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
 }
+
+/* ------------------------------------------------------------------ */
 
 export { auth }
