@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2300; /* above footer (1200), yt-button (1500) and settings-modal (2200) */
 }
 
 .rating-modal {

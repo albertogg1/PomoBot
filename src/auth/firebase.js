@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithRedirect, getRedirectResult, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, orderBy, getDocs, serverTimestamp } from 'firebase/firestore'
 
 // IMPORTANT: provide your Firebase config values via Vite env variables.
@@ -31,8 +31,17 @@ const db = app ? getFirestore(app) : null
 const googleProvider = new GoogleAuthProvider()
 const appleProvider = new OAuthProvider('apple.com')
 
+function isMobileDevice() {
+  try {
+    if (typeof navigator === 'undefined') return false
+    return /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent)
+  } catch (e) { return false }
+}
+
 export async function signInWithGoogle() {
   if (!auth) throw new Error('Firebase not initialized')
+  // Use redirect on mobile (better reliability), popup on desktop
+  if (isMobileDevice()) return signInWithRedirect(auth, googleProvider)
   return signInWithPopup(auth, googleProvider)
 }
 
@@ -40,6 +49,7 @@ export async function signInWithApple() {
   if (!auth) throw new Error('Firebase not initialized')
   // Make sure you have enabled Apple in Firebase console and configured
   // the Service ID and redirect URL in Apple Developer console.
+  if (isMobileDevice()) return signInWithRedirect(auth, appleProvider)
   return signInWithPopup(auth, appleProvider)
 }
 

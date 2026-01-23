@@ -54,6 +54,7 @@ function App() {
   // tone preview parameters
   const [workFreqs, setWorkFreqs] = useState([880,1040,1318])
   const [workVol, setWorkVol] = useState(0.32)
+  const ytAudioUnlockRef = useRef(null)
   
 
   
@@ -114,10 +115,32 @@ function App() {
     return () => clearInterval(interval)
   }, [isRunning])
 
+  // Unlock AudioContext on user gesture (mobile autoplay workaround)
+  const unlockYtAudio = async () => {
+    try {
+      if (ytAudioUnlockRef.current) return
+      const AudioCtx = window.AudioContext || window.webkitAudioContext
+      const ac = new AudioCtx()
+      // resume if suspended
+      if (ac.state === 'suspended' && ac.resume) await ac.resume()
+      // play a tiny silent buffer to mark a user-initiated playback
+      const buffer = ac.createBuffer(1, 1, ac.sampleRate || 22050)
+      const src = ac.createBufferSource()
+      src.buffer = buffer
+      src.connect(ac.destination)
+      src.start(0)
+      ytAudioUnlockRef.current = ac
+    } catch (e) {
+      // ignore
+    }
+  }
+
   // Auth state listener: load preferences when user logs in
   useEffect(() => {
     const unsub = onAuthChange(async (u) => {
       setUser(u)
+      // close auth popup once Firebase reports an authenticated user
+      if (u) setShowAuthPopup(false)
       if (u) {
         try {
           const prefs = await loadUserPreferences(u.uid)
@@ -307,7 +330,7 @@ function App() {
       <div className="header-info">
         <div className="session-info">
           <span className={`session-badge ${sessionType}`}>
-            {sessionType === 'work' ? <><GiTomato style={{marginRight:6, color:'#ff6b35'}} />Trabajo</> : <><FaCoffee style={{marginRight:6, color:'#8B5E3C'}} />Descanso</>}
+            {sessionType === 'work' ? <><img src="./pomodoro.png" alt="PomoBot" style={{marginRight:6, height:20}}/> Trabajo</> : <><FaCoffee style={{marginRight:6, color:'#8B5E3C'}} />Descanso</>}
           </span>
           <span className="sessions-count">Sesiones: {sessionsCompleted}</span>
         </div>
@@ -343,7 +366,7 @@ function App() {
           <div style={{marginTop:10}}>
             <div style={{display:'flex', flexDirection:'column', gap:8}}>
               <span className="perf-text" onClick={() => { openDashboard(); setShowAuthMenu(false) }}>Rendimiento</span>
-              <span className="perf-text" onClick={() => { setShowSettings(true); setShowAuthMenu(false) }}>Ajustes</span>
+              {/* <span className="perf-text" onClick={() => { setShowSettings(true); setShowAuthMenu(false) }}>Ajustes</span> */}
               <button className="logout-btn" onClick={async () => { await handleSignOut(); setShowAuthMenu(false) }}>
                 <FaSignOutAlt /> Cerrar sesión
               </button>
@@ -386,7 +409,7 @@ function App() {
         <div style={{display:'flex', alignItems:'center', gap:10}}>
           <button
             className={`yt-button ${ytPlaying ? 'playing' : ''} ${isDarkMode ? 'dark' : 'light'}`}
-            onClick={() => setYtPlaying((p) => !p)}
+            onClick={async () => { await unlockYtAudio(); setYtPlaying((p) => !p) }}
             aria-label={ytPlaying ? 'Detener música' : 'Reproducir música'}
           >
             {ytPlaying ? <FaVolumeMute size={18} /> : <FaMusic size={20} />}
@@ -454,8 +477,13 @@ function App() {
             </div>
 
             <div style={{marginTop:12, display:'flex', gap:8, flexDirection:'column'}}>
-              <button className="control-btn" onClick={handleSignInGoogle}><FaGoogle /> Google</button>
-              <button className="control-btn" onClick={handleSignInApple}><FaApple /> Apple</button>
+              <button className="control-btn social google" onClick={handleSignInGoogle} aria-label="Iniciar sesión con Google">
+                <span className="social-icon">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="18" height="18" />
+                </span>
+                <span className="social-text">Google</span>
+              </button>
+              {/* <button className="control-btn social apple" onClick={handleSignInApple} aria-label="Iniciar sesión con Apple"><FaApple /> Apple</button> */}
             </div>
           </div>
         </div>
@@ -473,14 +501,17 @@ function App() {
 
       {/* YouTube music toggle is now inside the footer-controls */}
 
-      {/* Hidden iframe to keep playback alive without foreground overlay */}
+      {/* Hidden iframe to keep playback alive without foreground overlay.
+          Use off-screen positioning instead of `display:none` so autoplay
+          can start on mobile after a user gesture. */}
       {ytPlaying && (
-        <div style={{display: 'none'}} aria-hidden="true">
+        <div style={{position: 'absolute', width: 1, height: 1, overflow: 'hidden', left: -9999, top: -9999}} aria-hidden="true">
           <iframe
             title="YouTube Live Hidden"
             src="https://www.youtube.com/embed/XSXEaikz0Bc?autoplay=1&controls=0&rel=0"
             frameBorder="0"
-            allow="autoplay; encrypted-media"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowFullScreen
           />
         </div>
       )}

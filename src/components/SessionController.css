@@ -4,7 +4,6 @@
   justify-content: center;
   flex-wrap: wrap;
   align-items: center;
-  margin-top: 10px;
 }
 
 /* Ensure the inner controls group lays out its buttons in a row */
@@ -20,8 +19,8 @@
   position: relative;
   bottom: auto;
   left: auto;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 2px solid #555555;
   background: #2a2a2a;
@@ -50,6 +49,12 @@
 .theme-toggle .theme-icon {
   display: inline-flex;
   vertical-align: middle;
+}
+
+/* Make the theme icon fit the smaller button */
+.theme-toggle .theme-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .theme-toggle.dark .theme-icon {
@@ -129,17 +134,10 @@
 
 .control-btn:hover {
   transform: translateY(-2px);
-  border-color: #777777;
-  background: #333333;
-  border-color: rgba(0,0,0,0.12);
-  background: rgba(0,0,0,0.06);
 }
 
 .session-controller.light .controls .control-btn:hover {
-  background: #c0c0c0;
-  border-color: #666666;
-  background: #e5e7eb;
-  border-color: rgba(15,23,42,0.04);
+  /* no color changes on hover; opacity handled by .controls:hover */
 }
 
 .control-btn:active {
@@ -153,14 +151,10 @@
   background: #1a1a1a;
   border: 1px solid rgba(15,23,42,0.04);
   color: #ffffff;
-  min-width: 100px;
 }
 
 .play-pause:hover {
-  background: #222222;
-  border-color: #777777;
-    background: rgba(0,0,0,0.06);
-    border-color: rgba(0,0,0,0.12);
+  /* no color changes on hover */
 }
 
 .play-pause.playing {
@@ -178,8 +172,7 @@
 }
 
 .reset:hover {
-  background: #222222;
-  border-color: #777777;
+  /* no color changes on hover */
 }
 
 .skip {
@@ -192,8 +185,7 @@
 }
 
 .skip:hover {
-  background: #222222;
-  border-color: #777777;
+  /* no color changes on hover */
 }
 
 .settings {
@@ -206,13 +198,10 @@
 }
 
 .settings:hover {
-  background: #222222;
-  border-color: #777777;
-    background: rgba(0,0,0,0.06);
-    border-color: rgba(0,0,0,0.12);
+  /* no color changes on hover */
 }
 
-@media (max-width: 600px) {
+@media (max-width: 750px) {
   .session-controller {
     gap: 8px;
   }
@@ -231,8 +220,7 @@
   }
 
   .play-pause {
-    min-width: 56px;
-    padding: 6px 10px;
+    /* inherit same padding/size as other .control-btn */
   }
 
   /* Reduce spacing between control buttons on small screens */
@@ -243,5 +231,29 @@
   /* Ensure play-pause doesn't keep extra right margin */
   .session-controller .controls .play-pause {
     margin-right: 0;
+  }
+
+  /* When labels are hidden on small viewports, make controls circular */
+  .session-controller .controls .control-btn {
+    padding: 0;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 50%;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+  }
+
+  .session-controller .controls .control-btn .icon {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Keep play/pause slightly larger for prominence */
+  .session-controller .controls .play-pause {
+    /* use same circular sizing as other control buttons */
   }
 }
