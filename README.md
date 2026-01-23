@@ -1,9 +1,9 @@
 <div align="center">
-  <img src="public/pomodoro.png" alt="PomoBot Logo" width="120" />
-  <h1>🍅 PomoBot</h1>
+  <img src="src/assets/pomodoro.png" alt="PomoBot Logo" width="120" />
+  <h1>PomoBot</h1>
   <p><strong>Tu compañero de estudio con la técnica Pomodoro</strong></p>
   
-  <a href="https://pomobot.vercel.app">Ver Demo en vivo</a>
+  <a href="https://pomo-bot.vercel.app">Anímate a probar la app</a>
 </div>
 
 ---
