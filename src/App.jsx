@@ -3,6 +3,7 @@ import { GiTomato } from 'react-icons/gi'
 import { FaCoffee, FaClock, FaMusic, FaVolumeMute, FaGoogle, FaApple, FaSignOutAlt, FaUser } from 'react-icons/fa'
 import { BsSun, BsMoon } from 'react-icons/bs'
 import FlipClock from './components/FlipClock'
+import pomoImg from './assets/pomodoro.png'
 import SessionController from './components/SessionController'
 import RatingModal from './components/RatingModal'
 import './App.css'
@@ -330,7 +331,7 @@ function App() {
       <div className="header-info">
         <div className="session-info">
           <span className={`session-badge ${sessionType}`}>
-            {sessionType === 'work' ? <><img src="/pomodoro.png" alt="PomoBot" style={{marginRight:6, height:20}}/> Trabajo</> : <><FaCoffee style={{marginRight:6, color:'#8B5E3C'}} />Descanso</>}
+            {sessionType === 'work' ? <><img src={pomoImg} alt="PomoBot" style={{marginRight:6, height:20}} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src='/pomodoro.png'}}/> Trabajo</> : <><FaCoffee style={{marginRight:6, color:'#8B5E3C'}} />Descanso</>}
           </span>
           <span className="sessions-count">Sesiones: {sessionsCompleted}</span>
         </div>
