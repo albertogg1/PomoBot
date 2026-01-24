@@ -24,9 +24,38 @@ export default function DailyLineChart({ sessions, date }) {
   const labels = items.map(s => toDate(s.createdAt) || new Date(s.completedAt))
   const dataPoints = items.map(s => s.rating)
 
+
+  // Segment styling: línea gris y discontinua si hay más de 2h entre puntos
+  const TWO_HOURS = 2 * 60 * 60 * 1000;
+  const dataset = {
+    label: 'Puntuación',
+    data: dataPoints,
+    borderColor: '#10B981',
+    backgroundColor: 'rgba(16,185,129,0.18)', // verde con opacidad
+    fill: true,
+    tension: 0,
+    pointRadius: 3,
+    segment: {
+      borderColor: (ctx) => {
+        const i = ctx.p0DataIndex;
+        if (i < 0 || i >= labels.length - 1) return '#10B981';
+        const t0 = labels[i]?.getTime?.() || new Date(labels[i]).getTime();
+        const t1 = labels[i+1]?.getTime?.() || new Date(labels[i+1]).getTime();
+        return (t1 - t0 > TWO_HOURS) ? '#fff' : '#10B981';
+      },
+      borderDash: (ctx) => {
+        const i = ctx.p0DataIndex;
+        if (i < 0 || i >= labels.length - 1) return undefined;
+        const t0 = labels[i]?.getTime?.() || new Date(labels[i]).getTime();
+        const t1 = labels[i+1]?.getTime?.() || new Date(labels[i+1]).getTime();
+        return (t1 - t0 > TWO_HOURS) ? [6,6] : undefined;
+      }
+    }
+  };
+
   const data = {
     labels,
-    datasets: [{ label: 'Puntuación', data: dataPoints, borderColor: '#10B981', backgroundColor: '#10B981', tension: 0.2, pointRadius:6 }]
+    datasets: [dataset]
   }
 
   const options = { responsive:true, maintainAspectRatio:false, scales:{ x:{ type:'time', time:{ unit:'hour', tooltipFormat:'p' } }, y:{ min:0, max:5, ticks:{stepSize:1} } }, plugins:{ legend:{display:false} } }

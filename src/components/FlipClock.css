@@ -89,10 +89,10 @@
   align-items: center;
   justify-content: center;
   font-size: 18vw;
-  font-weight: bold;
+  font-weight: 700;
   font-family: 'Bebas Neue', sans-serif;
   letter-spacing: 2px;
-  border-radius: 16px;
+  border-radius: .1em;
   overflow: hidden;
   padding: 10px;
 }

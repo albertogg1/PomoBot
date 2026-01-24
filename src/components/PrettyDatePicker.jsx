@@ -41,7 +41,7 @@ export default function PrettyDatePicker({ mode = 'day', value, onChange }) {
 
   return (
     <div className="pretty-datepicker-compact">
-      <button className="pretty-nav" onClick={onPrev} aria-label="prev"></button>
+      <button type="button" className="pretty-nav" onClick={onPrev} aria-label="prev"></button>
       <DatePicker
         selected={selected}
         onChange={handleChange}
@@ -56,7 +56,7 @@ export default function PrettyDatePicker({ mode = 'day', value, onChange }) {
         popperModifiers={[{ name: 'offset', options: { offset: [0, 6] } }]}
         showPopperArrow={false}
       />
-      <button className="pretty-nav" onClick={onNext} aria-label="next"></button>
+      <button type="button" className="pretty-nav" onClick={onNext} aria-label="next"></button>
     </div>
   )
 }

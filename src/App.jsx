@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { FaCoffee, FaClock, FaMusic, FaVolumeMute, FaGoogle, FaApple, FaSignOutAlt, FaUser } from 'react-icons/fa'
+import { FaMusic, FaVolumeMute, FaGoogle, FaApple, FaSignOutAlt, FaUser } from 'react-icons/fa'
 import { BsSun, BsMoon } from 'react-icons/bs'
 import FlipClock from './components/FlipClock'
 import pomoImg from './assets/pomodoro.png'
+import pomoImgsleep from './assets/pomodoro-sleep.png'
 import SessionController from './components/SessionController'
 import RatingModal from './components/RatingModal'
 import './App.css'
@@ -126,6 +127,8 @@ function App() {
           }
         }
       }, 1000)
+
+      
     }
 
     return () => clearInterval(interval)
@@ -405,7 +408,7 @@ function App() {
       <div className="header-info">
         <div className="session-info">
           <span className={`session-badge ${sessionType}`}>
-            {sessionType === 'work' ? <><img src={pomoImg} alt="PomoBot" style={{marginRight:6, height:20}} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src='/pomodoro.png'}}/> Trabajo</> : <><FaCoffee style={{marginRight:6, color:'#8B5E3C'}} />Descanso</>}
+            {sessionType === 'work' ? <><img src={pomoImg} alt="PomoBot" style={{marginRight:6, height:20}} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src='/pomodoro.png'}}/> Trabajo</> : <><img src={pomoImgsleep} alt="PomoBot" style={{marginRight:6, height:20}} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src='/pomodoro-sleep.png'}}/> Descanso</>}
           </span>
           <span className="sessions-count">Sesiones: {sessionsCompleted}</span>
         </div>
@@ -454,7 +457,7 @@ function App() {
 
       <FlipClock minutes={minutes} seconds={seconds} sessionType={sessionType} isDarkMode={isDarkMode} />
 
-        <div className="footer-controls">
+      <div className="footer-controls">
         {/* Left: theme toggle */}
         <button
           className={`theme-toggle ${isDarkMode ? 'dark' : 'light'}`}
@@ -490,8 +493,8 @@ function App() {
             {ytPlaying ? <FaVolumeMute size={18} /> : <FaMusic size={20} />}
           </button>
         </div>
-
       </div>
+
 
       {showSettings && (
         <div className="settings-modal" onClick={() => setShowSettings(false)}>

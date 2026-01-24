@@ -9,7 +9,7 @@ import WeeklyBarChart from './components/WeeklyBarChart'
 import MonthlyCalendar from './components/MonthlyCalendar'
 import PrettyDatePicker from './components/PrettyDatePicker'
 import { useMemo } from 'react'
-import { FaChevronLeft } from 'react-icons/fa'
+import { FaChevronLeft, FaStar } from 'react-icons/fa'
 
 
 export default function Dashboard({ user }) {
@@ -183,22 +183,25 @@ export default function Dashboard({ user }) {
                       <table className="sessions-table">
                       <thead>
                         <tr>
+                          <th>Fecha</th>
                           <th>Hora</th>
-                          <th>Duración (min)</th>
-                          <th>Puntuación</th>
+                          <th>Duración</th>
+                          <th> < FaStar /> </th>
                         </tr>
                       </thead>
                       <tbody>
                         {recentSessions.map(s => {
                           const created = s.createdAt?.toDate ? s.createdAt.toDate() : (s.createdAt && s.createdAt.seconds ? new Date(s.createdAt.seconds * 1000) : new Date())
-                          const time = created.toLocaleTimeString()
+                          const time = created.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                          const day = created.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }).replace('.', '')
                           const duration = Math.round((s.duration || 0) / 60)
                           const rating = s.rating != null ? `${s.rating}/5` : '—'
                           const ratingColor = s.rating != null ? getRatingColor(s.rating) : undefined
                           return (
                             <tr key={s.id}>
+                              <td>{day}</td>
                               <td>{time}</td>
-                              <td>{duration}</td>
+                              <td>{duration} min</td>
                               <td className="rating-cell" style={{color: ratingColor, fontWeight: 700}}>{rating}</td>
                             </tr>
                           )
@@ -244,12 +247,27 @@ export default function Dashboard({ user }) {
                 </div>
 
               </section>
-
+              
+              <section className="content">
+                
+              </section>
 
             </>
           )}
         </div>
+        <footer className="dashboard-footer" style={{
+          width: '100%',
+          background: 'rgba(245,247,251,0.95)',
+          color: '#6b7280',
+          textAlign: 'center',
+          padding: '18px 0 12px 0',
+          fontSize: 15,
+          borderTop: '1px solid #e5e7eb',
+        }}>
+        © {new Date().getFullYear()} · PomoBot
+        </footer>
       </main>
     </div>
+
   )
 }
