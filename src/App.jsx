@@ -6,7 +6,7 @@ import pomoImg from './assets/pomodoro.png'
 import SessionController from './components/SessionController'
 import RatingModal from './components/RatingModal'
 import './App.css'
-import { signInWithGoogle, signInWithApple, signOutUser, onAuthChange, saveUserPreferences, loadUserPreferences, createUserWithEmail, signInWithEmail } from './auth/firebase'
+import { signInWithGoogle, signInWithApple, signOutUser, onAuthChange, saveUserPreferences, loadUserPreferences, createUserWithEmail, signInWithEmail, sendPasswordReset } from './auth/firebase'
 import { Routes, Route, useNavigate } from 'react-router-dom'
 import Dashboard from './Dashboard'
 import { saveStudySession } from './auth/firebase'
@@ -39,6 +39,21 @@ function App() {
   const [authPassword, setAuthPassword] = useState('')
   const [authMode, setAuthMode] = useState('signin') // 'signin' or 'signup'
   const [authError, setAuthError] = useState(null)
+  const [resetMsg, setResetMsg] = useState(null)
+  const handleForgotPassword = async () => {
+    setResetMsg(null)
+    setAuthError(null)
+    if (!authEmail) {
+      setAuthError('Introduce tu email para recuperar la contraseña.')
+      return
+    }
+    try {
+      await sendPasswordReset(authEmail)
+      setResetMsg('Se ha enviado un correo para restablecer tu contraseña.')
+    } catch (e) {
+      setAuthError('No se pudo enviar el correo de recuperación.')
+    }
+  }
 
   const [showAuthMenu, setShowAuthMenu] = useState(false)
   const [showRatingModal, setShowRatingModal] = useState(false)
@@ -519,6 +534,7 @@ function App() {
           <div className="auth-content" onClick={(e) => e.stopPropagation()}>
             <h2>{authMode === 'signin' ? 'Iniciar sesión' : 'Registrarse'}</h2>
             {authError && <div style={{color:'salmon', marginBottom:8}}>{authError}</div>}
+            {resetMsg && <div style={{color:'#10B981', marginBottom:8}}>{resetMsg}</div>}
             <div className="settings-group">
               <label>Email</label>
               <input type="email" value={authEmail} onChange={(e)=> setAuthEmail(e.target.value)} />
@@ -526,6 +542,16 @@ function App() {
             <div className="settings-group">
               <label>Contraseña</label>
               <input type="password" value={authPassword} onChange={(e)=> setAuthPassword(e.target.value)} />
+              <div
+                style={{fontSize:'12px', color:'#888', marginTop:'4px', textAlign:'right', cursor:'pointer', opacity:0.8, textDecoration:'underline'}}
+                onClick={handleForgotPassword}
+                tabIndex={0}
+                role="button"
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleForgotPassword() }}
+                aria-label="Recuperar contraseña"
+              >
+                ¿Has olvidado tu contraseña?
+              </div>
             </div>
             <div style={{display:'flex', gap:8, marginTop:10}}>
               {authMode === 'signin' ? (

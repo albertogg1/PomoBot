@@ -11,6 +11,7 @@ import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail
 } from 'firebase/auth'
 import {
   getFirestore,
@@ -110,6 +111,14 @@ export async function createUserWithEmail(email, password) {
 
 export async function signInWithEmail(email, password) {
   return signInWithEmailAndPassword(auth, email, password)
+}
+
+
+/* ------------------------------------------------------------------ */
+/* Enviar email de recuperación de contraseña                         */
+/* ------------------------------------------------------------------ */
+export async function sendPasswordReset(email) {
+  return sendPasswordResetEmail(auth, email)
 }
 
 /* ------------------------------------------------------------------ */
