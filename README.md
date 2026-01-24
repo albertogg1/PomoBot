@@ -12,7 +12,7 @@
 
 **PomoBot** es una aplicación web gratuita diseñada para estudiantes que quieren mejorar su concentración y productividad utilizando la **técnica Pomodoro**.
 
-La técnica Pomodoro divide el tiempo de estudio en bloques de trabajo intenso (por defecto 25 minutos) seguidos de descansos cortos (5 minutos). Esta metodología está científicamente respaldada para mejorar la retención de información y reducir la fatiga mental.
+La técnica Pomodoro divide el tiempo de estudio en bloques de trabajo intenso (por defecto 50 minutos) seguidos de descansos cortos (10 minutos). Esta metodología está científicamente respaldada para mejorar la retención de información y reducir la fatiga mental.
 
 ---
 
@@ -93,8 +93,8 @@ PomoBot ofrece inicio de sesión con **Google** para:
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/tu-usuario/Pomodoro-Bot.git
-cd Pomodoro-Bot
+git clone https://github.com/albertogg1/PomoBot.git
+cd PomoBot
 
 # Instalar dependencias
 npm install

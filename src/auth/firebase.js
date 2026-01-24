@@ -25,6 +25,7 @@ import {
   serverTimestamp,
   limit as fsLimit,
   Timestamp,
+  where,
 } from 'firebase/firestore'
 
 /* ------------------------------------------------------------------ */
@@ -165,6 +166,22 @@ export async function fetchUserSessions(uid, limit = 50) {
     col,
     orderBy('createdAt', 'desc'),
     fsLimit(limit)
+  )
+
+  const snap = await getDocs(q)
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+}
+
+export async function fetchUserSessionsByMonth(uid, year, month) {
+  const col = collection(db, 'users', uid, 'sessions')
+  const startOfMonth = new Date(year, month, 1)
+  const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59, 999)
+  
+  const q = query(
+    col,
+    where('createdAt', '>=', Timestamp.fromDate(startOfMonth)),
+    where('createdAt', '<=', Timestamp.fromDate(endOfMonth)),
+    orderBy('createdAt', 'desc')
   )
 
   const snap = await getDocs(q)

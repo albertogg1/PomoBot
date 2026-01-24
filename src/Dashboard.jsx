@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { startOfWeek } from 'date-fns'
-import { fetchUserSessions } from './auth/firebase'
+import { fetchUserSessionsByMonth } from './auth/firebase'
 import { useNavigate } from 'react-router-dom'
 import './Dashboard.css'
 // charts: daily, weekly, monthly
@@ -15,26 +15,49 @@ import { FaChevronLeft } from 'react-icons/fa'
 export default function Dashboard({ user }) {
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadedMonths, setLoadedMonths] = useState(new Set())
   const navigate = useNavigate()
 
+  const today = new Date()
+  const [selectedMonth, setSelectedMonth] = useState(() => ({ year: today.getFullYear(), month: today.getMonth() }))
+
+  // Cargar sesiones del mes seleccionado
   useEffect(() => {
     if (!user) return navigate('/')
+    const monthKey = `${selectedMonth.year}-${selectedMonth.month}`
+    if (loadedMonths.has(monthKey)) {
+      setLoading(false)
+      return
+    }
+    setLoading(true)
     let mounted = true
-    fetchUserSessions(user.uid).then((items) => {
+    fetchUserSessionsByMonth(user.uid, selectedMonth.year, selectedMonth.month).then((items) => {
       if (!mounted) return
-      setSessions(items)
+      setSessions(prev => {
+        // Combinar sesiones evitando duplicados
+        const existingIds = new Set(prev.map(s => s.id))
+        const newItems = items.filter(s => !existingIds.has(s.id))
+        return [...prev, ...newItems]
+      })
+      setLoadedMonths(prev => new Set(prev).add(monthKey))
       setLoading(false)
     }).catch((e) => {
       console.error(e)
       setLoading(false)
     })
     return () => { mounted = false }
-  }, [user])
+  }, [user, selectedMonth])
 
-  const totalMinutes = sessions.reduce((sum, s) => sum + (s.duration || 0), 0) / 60
-  const totalSessions = sessions.length
+  // Filtrar sesiones del mes seleccionado para estadísticas
+  const sessionsOfMonth = useMemo(() => sessions.filter(s => {
+    const ts = s.createdAt?.toDate ? s.createdAt.toDate() : (s.createdAt && s.createdAt.seconds ? new Date(s.createdAt.seconds * 1000) : null)
+    if (!ts) return false
+    return ts.getFullYear() === selectedMonth.year && ts.getMonth() === selectedMonth.month
+  }), [sessions, selectedMonth])
 
-  const today = new Date()
+  const totalMinutes = sessionsOfMonth.reduce((sum, s) => sum + (s.duration || 0), 0) / 60
+  const totalSessions = sessionsOfMonth.length
+
   const [selectedDay, setSelectedDay] = useState(new Date())
   const [selectedWeekStart, setSelectedWeekStart] = useState(() => {
     const d = new Date()
@@ -42,12 +65,25 @@ export default function Dashboard({ user }) {
     start.setHours(0,0,0,0)
     return start
   })
-  const [selectedMonth, setSelectedMonth] = useState(() => ({ year: today.getFullYear(), month: today.getMonth() }))
   const isSameDay = (d1, d2) => d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate()
-  const sessionsToday = sessions.filter(s => {
+  const sessionsToday = sessionsOfMonth.filter(s => {
     const ts = s.createdAt?.toDate ? s.createdAt.toDate() : (s.createdAt && s.createdAt.seconds ? new Date(s.createdAt.seconds * 1000) : null)
     return ts ? isSameDay(ts, today) : false
   }).length
+
+  // Sesiones recientes: solo las de las últimas 24 horas
+  const recentSessions = useMemo(() => {
+    const now = new Date()
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    return sessions.filter(s => {
+      const ts = s.createdAt?.toDate ? s.createdAt.toDate() : (s.createdAt && s.createdAt.seconds ? new Date(s.createdAt.seconds * 1000) : null)
+      return ts && ts >= oneDayAgo
+    }).sort((a, b) => {
+      const tsA = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt && a.createdAt.seconds ? new Date(a.createdAt.seconds * 1000) : new Date(0))
+      const tsB = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt && b.createdAt.seconds ? new Date(b.createdAt.seconds * 1000) : new Date(0))
+      return tsB - tsA
+    })
+  }, [sessions])
 
   const scoresForSelectedDay = useMemo(() => sessions.filter(s => {
     const ts = s.createdAt?.toDate ? s.createdAt.toDate() : (s.createdAt && s.createdAt.seconds ? new Date(s.createdAt.seconds * 1000) : (s.completedAt ? new Date(s.completedAt) : null))
@@ -140,8 +176,8 @@ export default function Dashboard({ user }) {
                 </div>
                 <div className="card recent div5">
                   <h3>Sesiones recientes</h3>
-                  {sessions.length === 0 ? (
-                    <div className="empty">No hay sesiones registradas.</div>
+                  {recentSessions.length === 0 ? (
+                    <div className="empty">No hay sesiones en las últimas 24 horas.</div>
                   ) : (
                     <div className="sessions-scroll">
                       <table className="sessions-table">
@@ -153,7 +189,7 @@ export default function Dashboard({ user }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {sessions.map(s => {
+                        {recentSessions.map(s => {
                           const created = s.createdAt?.toDate ? s.createdAt.toDate() : (s.createdAt && s.createdAt.seconds ? new Date(s.createdAt.seconds * 1000) : new Date())
                           const time = created.toLocaleTimeString()
                           const duration = Math.round((s.duration || 0) / 60)

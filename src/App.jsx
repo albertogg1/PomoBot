@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { GiTomato } from 'react-icons/gi'
 import { FaCoffee, FaClock, FaMusic, FaVolumeMute, FaGoogle, FaApple, FaSignOutAlt, FaUser } from 'react-icons/fa'
 import { BsSun, BsMoon } from 'react-icons/bs'
 import FlipClock from './components/FlipClock'
@@ -45,6 +44,7 @@ function App() {
   const [showRatingModal, setShowRatingModal] = useState(false)
   const [lastSessionType, setLastSessionType] = useState('work')
   // dashboard navigation handled via router
+  const [ratingMessage, setRatingMessage] = useState(null)
 
   const totalRef = useRef(workDuration * 60)
   const authButtonRef = useRef(null)
@@ -308,20 +308,79 @@ function App() {
     if (user) {
       const durationSec = workDurationRef.current * 60
       const now = new Date()
-      saveStudySession(user.uid, {
+      const sessionData = {
         type: 'work',
         duration: durationSec,
         rating: rating,
         completedAt: now.toISOString(),
         meta: { rating: rating }
-      }).catch((e) => console.warn('saveStudySession failed', e))
+      }
+      console.log('Guardando sesión para usuario:', user.uid, sessionData)
+      saveStudySession(user.uid, sessionData)
+        .then(() => {
+          setRatingMessage({ type: 'success', text: '¡Evaluación registrada correctamente!' })
+        })
+        .catch((e) => {
+          setRatingMessage({ type: 'error', text: 'Error al registrar la evaluación.' })
+          console.warn('saveStudySession failed', e)
+        })
     }
     setShowRatingModal(false)
   }
+  // Oculta el mensaje de rating después de 2.5 segundos
+  useEffect(() => {
+    if (ratingMessage) {
+      const t = setTimeout(() => setRatingMessage(null), 2500)
+      return () => clearTimeout(t)
+    }
+  }, [ratingMessage])
 
   const handleRatingClose = () => {
     setShowRatingModal(false)
   }
+
+  // Actualiza el título de la pestaña con el tiempo restante solo cuando se pulsa play
+  const updateTabTitle = (mm, ss) => {
+    document.title = `${mm}:${ss} - PomoBot`;
+  };
+
+  const restoreTabTitle = () => {
+    document.title = 'PomoBot';
+  };
+
+  // Ref para el intervalo de título
+  const titleIntervalRef = useRef(null);
+
+  const startTitleInterval = () => {
+    if (titleIntervalRef.current) clearInterval(titleIntervalRef.current);
+    const update = () => {
+      const mm = String(minutes).padStart(2, '0');
+      const ss = String(seconds).padStart(2, '0');
+      updateTabTitle(mm, ss);
+    };
+    update();
+    titleIntervalRef.current = setInterval(update, 1000);
+  };
+
+  const stopTitleInterval = () => {
+    if (titleIntervalRef.current) {
+      clearInterval(titleIntervalRef.current);
+      titleIntervalRef.current = null;
+    }
+    restoreTabTitle();
+  };
+
+  // Limpia el intervalo al desmontar
+  useEffect(() => () => stopTitleInterval(), []);
+
+  // Cambia el título solo cuando el temporizador se inicia o se detiene
+  useEffect(() => {
+    if (isRunning) {
+      startTitleInterval();
+    } else {
+      stopTitleInterval();
+    }
+  }, [isRunning, minutes, seconds]);
 
   return (
     <Routes>
@@ -498,13 +557,28 @@ function App() {
         />
       )}
 
+      {ratingMessage && (
+        <div className={`popup-message ${ratingMessage.type}`} style={{
+          position: 'fixed',
+          top: 40,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: ratingMessage.type === 'success' ? '#4caf50' : '#f44336',
+          color: '#fff',
+          padding: '14px 28px',
+          borderRadius: 8,
+          zIndex: 2000,
+          fontSize: 18,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.15)'
+        }}>
+          {ratingMessage.text}
+        </div>
+      )}
+
       
 
-      {/* YouTube music toggle is now inside the footer-controls */}
-
-      {/* Hidden iframe to keep playback alive without foreground overlay.
-          Use off-screen positioning instead of `display:none` so autoplay
-          can start on mobile after a user gesture. */}
+        {/* YouTube music toggle está en footer-controls */}
+        {/* El iframe oculto mantiene la reproducción activa sin overlay visible. */}
       {ytPlaying && (
         <div style={{position: 'absolute', width: 1, height: 1, overflow: 'hidden', left: -9999, top: -9999}} aria-hidden="true">
           <iframe

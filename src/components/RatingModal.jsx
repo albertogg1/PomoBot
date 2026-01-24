@@ -12,8 +12,8 @@ export default function RatingModal({ onSubmit, onClose, sessionType }) {
   }
 
   const label = sessionType === 'work' 
-    ? '¿Cuán productivo fue este pomodoro?' 
-    : '¿Cuán descansado te sientes?'
+    ? '¿Cómo de productivo fue este pomodoro?' 
+    : '¿Cuánto de descansado te sientes?'
 
   return (
     <div className="rating-modal-overlay">

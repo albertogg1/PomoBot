@@ -1,6 +1,6 @@
 import './SessionController.css'
 import { BsSun, BsMoon } from 'react-icons/bs'
-import { FaPlay, FaPause, FaRedo, FaForward, FaClock } from 'react-icons/fa'
+import { FaPlay, FaPause, FaRedo, FaForward, FaCog } from 'react-icons/fa'
 
 export default function SessionController({ isRunning, onToggle, onReset, onSkip, isDarkMode, onThemeToggle, onOpenSettings, workDuration, breakDuration }) {
   return (
@@ -38,7 +38,7 @@ export default function SessionController({ isRunning, onToggle, onReset, onSkip
           onClick={onOpenSettings}
           title={`Personalizar: ${workDuration}m estudio, ${breakDuration}m descanso`}
         >
-          <span className="icon"><FaClock /></span>
+          <span className="icon"><FaCog /></span>
           <span className="text">Personalizar</span>
         </button>
       </div>
