@@ -1,16 +1,126 @@
-.month-grid{display:flex;flex-direction:column;gap:6px}
-.weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:12px;color:#6b7280;width:100%}
-.week-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;width:100%;grid-auto-rows:1fr}
-.day-cell{background:transparent;border-radius:8px;padding:4px;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;}
-.day-cell.muted{opacity:0.45}
-.day-num{font-size:12px;color:inherit}
-.day-circle{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(15,23,42,0.04);box-shadow:0 6px 18px rgba(2,6,23,0.06), inset 0 -2px 0 rgba(255,255,255,0.02);box-sizing:border-box;overflow:hidden}
-.day-circle .day-num{color:#ffffff;font-weight:700;font-size:15px;line-height:1;display:inline-block;width:100%;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.day-circle.no-data{background:#e5e7eb}
-.day-circle.no-data .day-num{color:#0f172a;font-weight:600}
+.month-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 6px
+}
+
+.weekdays {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 6px;
+	font-size: 12px;
+	color: #6b7280;
+	width: 100%
+}
+
+.week-row {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 6px;
+	width: 100%;
+	grid-auto-rows: 1fr
+}
+
+.weekdays,
+.week-row {
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+
+.day-cell {
+	width: 100%;
+	aspect-ratio: 1 / 1;
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+}
+
+.day-cell.muted {
+	opacity: 0.45
+}
+
+.day-num {
+	font-size: 12px;
+	color: inherit
+}
+
+.day-circle {
+	width: 80%;
+	height: 80%;
+	max-width: 44px;
+	max-height: 44px;
+	min-width: 28px;
+	min-height: 28px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
 
 @media (max-width: 600px) {
-	.day-circle{width:36px;height:36px}
-	.day-circle .day-num{font-size:12px}
-	.day-num{font-size:12px}
+	.day-circle {
+		max-width: 36px;
+		max-height: 36px;
+	}
+
+	.day-circle .day-num {
+		font-size: 11px;
+	}
+}
+@media (min-width: 768px) {
+	.weekdays,
+	.week-row {
+		gap: 4px;
+	}
+}
+
+
+.day-circle .day-num {
+	color: #ffffff;
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1;
+	display: inline-block;
+	width: 100%;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis
+}
+
+.day-circle.no-data {
+	background: #e5e7eb
+}
+
+.day-circle.no-data .day-num {
+	color: #0f172a;
+	font-weight: 600
+}
+
+@media (max-width: 600px) {
+	.day-circle {
+		width: 36px;
+		height: 36px
+	}
+
+	.day-circle .day-num {
+		font-size: 12px
+	}
+
+	.day-num {
+		font-size: 12px
+	}
+}
+
+.card,
+.panel,
+.month-container { /* el que uses realmente */
+	overflow: hidden;
+}
+
+.week-row {
+	grid-template-columns: repeat(7, minmax(0, 1fr));
 }

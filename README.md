@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="src/assets/pomodoro.png" alt="PomoBot Logo" width="120" />
+  <img src="src/assets/pomodoro.webp" alt="PomoBot Logo" width="120" />
   <h1>PomoBot</h1>
   <p><strong>Tu compañero de estudio con la técnica Pomodoro</strong></p>
   
