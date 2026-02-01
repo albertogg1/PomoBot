@@ -27,14 +27,20 @@ export default function PrettyDatePicker({ mode = 'day', value, onChange }) {
 
   const onPrev = () => {
     if (mode === 'day') return onChange && onChange(addDays(selected, -1))
-    if (mode === 'week') return onChange && onChange(addDays(selected, -7))
-    if (mode === 'month') return onChange && onChange({ year: selected.getFullYear(), month: selected.getMonth() === 0 ? 11 : selected.getMonth() - 1 })
+    if (mode === 'week') return onChange && onChange(addDays(selected, -7)) 
+    if (mode === 'month') {
+      const isJan = selected.getMonth() === 0
+      return onChange && onChange({ year: isJan ? selected.getFullYear() - 1 : selected.getFullYear(), month: isJan ? 11 : selected.getMonth() - 1 })
+    }
   }
 
   const onNext = () => {
     if (mode === 'day') return onChange && onChange(addDays(selected, 1))
     if (mode === 'week') return onChange && onChange(addDays(selected, 7))
-    if (mode === 'month') return onChange && onChange({ year: selected.getFullYear(), month: selected.getMonth() === 11 ? 0 : selected.getMonth() + 1 })
+    if (mode === 'month') {
+      const isDec = selected.getMonth() === 11
+      return onChange && onChange({ year: isDec ? selected.getFullYear() + 1 : selected.getFullYear(), month: isDec ? 0 : selected.getMonth() + 1 })
+    }
   }
 
   const dateFormat = mode === 'month' ? 'MMM yyyy' : (mode === 'day' ? 'dd/MM' : 'dd/MM')
